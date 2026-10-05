@@ -1,0 +1,26 @@
+// app/manifest.ts
+import { MetadataRoute } from 'next';
+
+export default function manifest(): MetadataRoute.Manifest {
+  return {
+    name: 'Kalendarz Wywozu Odpadów',
+    short_name: 'Wywozy',
+    description: 'Harmonogram wywozu odpadów – Środa Śląska',
+    start_url: '/',
+    display: 'standalone',
+    background_color: '#ffffff',
+    theme_color: '#1565c0',
+    icons: [
+      {
+        src: '/icon-192.png',
+        sizes: '192x192',
+        type: 'image/png',
+      },
+      {
+        src: '/icon-512.png',
+        sizes: '512x512',
+        type: 'image/png',
+      },
+    ],
+  };
+}
