@@ -38,6 +38,17 @@ const MONTH_NAMES = [
 
 const WEEKDAYS = ['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'So', 'Nd'];
 
+function urlBase64ToUint8Array(base64String: string) {
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
 function getTagStyle(item: string) {
   const lower = item.toLowerCase();
   
@@ -65,6 +76,8 @@ function getTagStyle(item: string) {
 
 export default function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(() => new Date(2026, 9, 1));
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -81,11 +94,70 @@ export default function CalendarPage() {
     setCurrentDate(new Date(year, month + offset, 1));
   };
 
+  const subscribeToPush = async () => {
+    setLoading(true);
+    try {
+      if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+        alert('Przeglądarka nie wspiera powiadomień Push.');
+        return;
+      }
+
+      const registration = await navigator.serviceWorker.register('/sw.js');
+      await navigator.serviceWorker.ready;
+
+      const publicVapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+      if (!publicVapidKey) {
+        alert('Brak klucza VAPID w zmiennych środowiskowych.');
+        return;
+      }
+
+      const subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(publicVapidKey),
+      });
+
+      await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(subscription),
+      });
+
+      setIsSubscribed(true);
+      alert('Pomyślnie włączono powiadomienia Push!');
+    } catch (error) {
+      console.error(error);
+      alert('Wystąpił błąd podczas włączania powiadomień.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div style={{ maxWidth: '800px', margin: '2rem auto', fontFamily: 'system-ui, sans-serif', padding: '0 1rem' }}>
-      <header style={{ textAlign: 'center', marginBottom: '2rem' }}>
+      <header style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
         <h1 style={{ fontSize: '1.8rem', margin: '0 0 0.5rem 0' }}>🗑️ Kalendarz Wywozu Odpadów</h1>
-        <p style={{ color: '#666', margin: 0 }}>Środa Śląska – I Rejon (Zabudowa Jednorodzinna)</p>
+        <p style={{ color: '#666', margin: '0 0 1rem 0' }}>Środa Śląska – I Rejon (Zabudowa Jednorodzinna)</p>
+        
+        <button
+          onClick={subscribeToPush}
+          disabled={isSubscribed || loading}
+          style={{
+            padding: '0.6rem 1.2rem',
+            fontSize: '0.9rem',
+            fontWeight: 'bold',
+            backgroundColor: isSubscribed ? '#2e7d32' : '#1565c0',
+            color: '#ffffff',
+            border: 'none',
+            borderRadius: '6px',
+            cursor: isSubscribed ? 'default' : 'pointer',
+            margin: '0 auto',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}
+        >
+          🔔 {isSubscribed ? 'Powiadomienia Push Aktywne' : 'Włącz Powiadomienia Push'}
+        </button>
       </header>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
