@@ -3,12 +3,12 @@
 import { useState } from 'react';
 
 const WASTE_SCHEDULE_REGION_1: Record<string, string[]> = {
-  '2026-09-07': ['Zmieszane', 'Biodegradowalne', 'Papier'],
+  '2026-09-07': ['Zmieszane', 'BIO', 'Papier'],
   '2026-09-10': ['Wielkogabaryty'],
-  '2026-09-14': ['Zmieszane', 'Biodegradowalne', 'Metale i tworzywa sztuczne'],
+  '2026-09-14': ['Zmieszane', 'BIO', 'Metale i tworzywa sztuczne'],
   '2026-09-19': ['Tekstylia i odzież'],
-  '2026-09-21': ['Zmieszane', 'Biodegradowalne'],
-  '2026-09-28': ['Zmieszane', 'Biodegradowalne', 'Metale i tworzywa sztuczne', 'Szkło'],
+  '2026-09-21': ['Zmieszane', 'BIO'],
+  '2026-09-28': ['Zmieszane', 'BIO', 'Metale i tworzywa sztuczne', 'Szkło'],
 };
 
 const MONTH_NAMES = [
@@ -24,7 +24,7 @@ function getTagStyle(item: string) {
   if (lower.includes('zmieszane')) {
     return { backgroundColor: '#212121', color: '#ffffff' };
   }
-  if (lower.includes('bio') || lower.includes('biodegradowalne')) {
+  if (lower.includes('bio')) {
     return { backgroundColor: '#5d4037', color: '#ffffff' };
   }
   if (lower.includes('metale') || lower.includes('tworzywa')) {
@@ -35,6 +35,9 @@ function getTagStyle(item: string) {
   }
   if (lower.includes('papier')) {
     return { backgroundColor: '#1565c0', color: '#ffffff' };
+  }
+  if (lower.includes('wielkogabaryty') || lower.includes('gabaryty')) {
+    return { backgroundColor: '#c62828', color: '#ffffff' };
   }
   
   return { backgroundColor: '#e0e0e0', color: '#212121' };
