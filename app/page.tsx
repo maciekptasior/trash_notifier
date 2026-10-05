@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { WASTE_SCHEDULE_REGION_1 } from '../lib/schedule';
+import { WASTE_SCHEDULE_REGION_1 } from '../lib/schedule.ts';
 
 const MONTH_NAMES = [
   'Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec',
