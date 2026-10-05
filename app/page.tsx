@@ -36,7 +36,9 @@ const MONTH_NAMES = [
   'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'
 ];
 
-const WEEKDAYS = ['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'So', 'Nd'];
+const WEEKDAYS_FULL = [
+  'Niedziela', 'Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota'
+];
 
 function urlBase64ToUint8Array(base64String: string) {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
@@ -82,14 +84,6 @@ export default function CalendarPage() {
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
 
-  const firstDayOfMonth = new Date(year, month, 1);
-  const lastDayOfMonth = new Date(year, month + 1, 0);
-
-  let startingDay = firstDayOfMonth.getDay() - 1;
-  if (startingDay === -1) startingDay = 6;
-
-  const totalDays = lastDayOfMonth.getDate();
-
   const changeMonth = (offset: number) => {
     setCurrentDate(new Date(year, month + offset, 1));
   };
@@ -132,18 +126,26 @@ export default function CalendarPage() {
     }
   };
 
+  // Filtrowanie wywozów dla aktualnie wybranego miesiąca
+  const activePickups = Object.entries(WASTE_SCHEDULE_REGION_1)
+    .filter(([dateStr]) => {
+      const [y, m] = dateStr.split('-').map(Number);
+      return y === year && m === month + 1;
+    })
+    .sort(([dateA], [dateB]) => dateA.localeCompare(dateB));
+
   return (
-    <div style={{ maxWidth: '800px', margin: '2rem auto', fontFamily: 'system-ui, sans-serif', padding: '0 1rem' }}>
-      <header style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-        <h1 style={{ fontSize: '1.8rem', margin: '0 0 0.5rem 0' }}>🗑️ Kalendarz Wywozu Odpadów</h1>
-        <p style={{ color: '#666', margin: '0 0 1rem 0' }}>Środa Śląska – I Rejon (Zabudowa Jednorodzinna)</p>
+    <div style={{ maxWidth: '600px', margin: '1rem auto', fontFamily: 'system-ui, sans-serif', padding: '0 0.75rem' }}>
+      <header style={{ textAlign: 'center', marginBottom: '1.25rem' }}>
+        <h1 style={{ fontSize: '1.5rem', margin: '0 0 0.4rem 0' }}>🗑️ Kalendarz Wywozu Odpadów</h1>
+        <p style={{ color: '#666', fontSize: '0.9rem', margin: '0 0 0.8rem 0' }}>Środa Śląska – I Rejon</p>
         
         <button
           onClick={subscribeToPush}
           disabled={isSubscribed || loading}
           style={{
-            padding: '0.6rem 1.2rem',
-            fontSize: '0.9rem',
+            padding: '0.5rem 1rem',
+            fontSize: '0.85rem',
             fontWeight: 'bold',
             backgroundColor: isSubscribed ? '#2e7d32' : '#1565c0',
             color: '#ffffff',
@@ -153,93 +155,80 @@ export default function CalendarPage() {
             margin: '0 auto',
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '8px'
+            gap: '6px'
           }}
         >
-          🔔 {isSubscribed ? 'Powiadomienia Push Aktywne' : 'Włącz Powiadomienia Push'}
+          🔔 {isSubscribed ? 'Powiadomienia Aktywne' : 'Włącz Powiadomienia Push'}
         </button>
       </header>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
         <button 
           onClick={() => changeMonth(-1)}
-          style={{ padding: '0.5rem 1rem', fontSize: '1rem', cursor: 'pointer', borderRadius: '4px', border: '1px solid #ccc' }}
+          style={{ padding: '0.4rem 0.8rem', fontSize: '0.9rem', cursor: 'pointer', borderRadius: '6px', border: '1px solid #ccc', backgroundColor: '#fff' }}
         >
           ← Poprzedni
         </button>
-        <h2 style={{ fontSize: '1.4rem', margin: 0 }}>
+        <h2 style={{ fontSize: '1.2rem', margin: 0, fontWeight: 'bold' }}>
           {MONTH_NAMES[month]} {year}
         </h2>
         <button 
           onClick={() => changeMonth(1)}
-          style={{ padding: '0.5rem 1rem', fontSize: '1rem', cursor: 'pointer', borderRadius: '4px', border: '1px solid #ccc' }}
+          style={{ padding: '0.4rem 0.8rem', fontSize: '0.9rem', cursor: 'pointer', borderRadius: '6px', border: '1px solid #ccc', backgroundColor: '#fff' }}
         >
           Następny →
         </button>
       </div>
 
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(7, 1fr)', 
-        gap: '8px', 
-        backgroundColor: '#f9f9f9', 
-        padding: '12px', 
-        borderRadius: '8px',
-        border: '1px solid #eee'
-      }}>
-        {WEEKDAYS.map((day) => (
-          <div key={day} style={{ fontWeight: 'bold', textAlign: 'center', padding: '8px 0', color: '#555' }}>
-            {day}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        {activePickups.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '2rem', backgroundColor: '#f9f9f9', borderRadius: '8px', color: '#666' }}>
+            Brak zaplanowanych wywozów w tym miesiącu.
           </div>
-        ))}
+        ) : (
+          activePickups.map(([dateStr, items]) => {
+            const dateObj = new Date(dateStr);
+            const dayNum = dateObj.getDate();
+            const dayName = WEEKDAYS_FULL[dateObj.getDay()];
 
-        {Array.from({ length: startingDay }).map((_, index) => (
-          <div key={`empty-${index}`} style={{ minHeight: '90px', backgroundColor: '#fff', opacity: 0.3 }} />
-        ))}
+            return (
+              <div 
+                key={dateStr}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #e0e0e0',
+                  borderLeft: '5px solid #2e7d32',
+                  borderRadius: '8px',
+                  padding: '10px 12px',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                  gap: '12px'
+                }}
+              >
+                <div style={{ minWidth: '70px', textAlign: 'center', borderRight: '1px solid #eee', paddingRight: '8px' }}>
+                  <div style={{ fontSize: '1.3rem', fontWeight: 'bold', color: '#222', lineHeight: '1.1' }}>
+                    {dayNum}
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '2px' }}>
+                    {dayName}
+                  </div>
+                </div>
 
-        {Array.from({ length: totalDays }).map((_, index) => {
-          const dayNumber = index + 1;
-          const formattedMonth = String(month + 1).padStart(2, '0');
-          const formattedDay = String(dayNumber).padStart(2, '0');
-          const dateKey = `${year}-${formattedMonth}-${formattedDay}`;
-
-          const wasteItems = WASTE_SCHEDULE_REGION_1[dateKey];
-
-          return (
-            <div 
-              key={dayNumber} 
-              style={{ 
-                minHeight: '100px', 
-                backgroundColor: '#fff', 
-                border: wasteItems ? '2px solid #2e7d32' : '1px solid #e0e0e0', 
-                borderRadius: '6px',
-                padding: '6px',
-                display: 'flex',
-                flexDirection: 'column',
-                boxShadow: wasteItems ? '0 2px 4px rgba(0,0,0,0.05)' : 'none'
-              }}
-            >
-              <span style={{ fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '4px', color: '#333' }}>
-                {dayNumber}
-              </span>
-              
-              {wasteItems && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                  {wasteItems.map((item, i) => {
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', flex: 1 }}>
+                  {items.map((item, i) => {
                     const style = getTagStyle(item);
                     return (
-                      <span 
-                        key={i} 
-                        style={{ 
-                          fontSize: '0.65rem', 
+                      <span
+                        key={i}
+                        style={{
+                          fontSize: '0.8rem',
                           fontWeight: 'bold',
-                          backgroundColor: style.backgroundColor, 
-                          color: style.color, 
-                          padding: '3px 4px', 
-                          borderRadius: '3px',
-                          lineHeight: '1.1',
-                          display: 'block',
-                          wordBreak: 'break-word'
+                          backgroundColor: style.backgroundColor,
+                          color: style.color,
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          display: 'inline-block'
                         }}
                       >
                         {item}
@@ -247,10 +236,10 @@ export default function CalendarPage() {
                     );
                   })}
                 </div>
-              )}
-            </div>
-          );
-        })}
+              </div>
+            );
+          })
+        )}
       </div>
     </div>
   );
