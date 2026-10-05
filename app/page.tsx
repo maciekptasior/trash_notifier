@@ -3,12 +3,32 @@
 import { useState } from 'react';
 
 const WASTE_SCHEDULE_REGION_1: Record<string, string[]> = {
+  // WRZESIEN 2026
   '2026-09-07': ['Zmieszane', 'BIO', 'Papier'],
   '2026-09-10': ['Wielkogabaryty'],
   '2026-09-14': ['Zmieszane', 'BIO', 'Metale i tworzywa sztuczne'],
   '2026-09-19': ['Tekstylia i odzież'],
   '2026-09-21': ['Zmieszane', 'BIO'],
   '2026-09-28': ['Zmieszane', 'BIO', 'Metale i tworzywa sztuczne', 'Szkło'],
+
+  // PAZDZIERNIK 2026
+  '2026-10-05': ['Zmieszane', 'BIO', 'Papier'],
+  '2026-10-12': ['Zmieszane', 'BIO', 'Metale i tworzywa sztuczne'],
+  '2026-10-19': ['Zmieszane', 'BIO'],
+  '2026-10-26': ['Zmieszane', 'BIO', 'Metale i tworzywa sztuczne'],
+
+  // LISTOPAD 2026
+  '2026-11-02': ['Zmieszane', 'BIO', 'Papier'],
+  '2026-11-09': ['Zmieszane', 'BIO', 'Metale i tworzywa sztuczne'],
+  '2026-11-16': ['Zmieszane', 'BIO'],
+  '2026-11-23': ['Zmieszane', 'BIO', 'Metale i tworzywa sztuczne', 'Szkło'],
+  '2026-11-30': ['Zmieszane', 'BIO'],
+
+  // GRUDZIEN 2026
+  '2026-12-07': ['Zmieszane', 'BIO', 'Papier'],
+  '2026-12-14': ['Zmieszane', 'BIO', 'Metale i tworzywa sztuczne'],
+  '2026-12-21': ['Zmieszane', 'BIO'],
+  '2026-12-28': ['Zmieszane', 'BIO', 'Metale i tworzywa sztuczne']
 };
 
 const MONTH_NAMES = [
@@ -40,11 +60,11 @@ function getTagStyle(item: string) {
     return { backgroundColor: '#c62828', color: '#ffffff' };
   }
   
-  return { backgroundColor: '#e0e0e0', color: '#212121' };
+  return { backgroundColor: '#757575', color: '#ffffff' };
 }
 
 export default function CalendarPage() {
-  const [currentDate, setCurrentDate] = useState(new Date(2026, 8, 1));
+  const [currentDate, setCurrentDate] = useState(() => new Date(2026, 9, 1));
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
