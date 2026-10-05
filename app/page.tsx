@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import InstallPWA from './InstallPWA'; // <-- 1. IMPORT KOMPONENTU
 
 const WASTE_SCHEDULE_REGION_1: Record<string, string[]> = {
   // WRZESIEN 2026
@@ -161,27 +162,31 @@ export default function CalendarPage() {
         <h1 style={{ fontSize: '1.5rem', margin: '0 0 0.4rem 0' }}>🗑️ Kalendarz Wywozu Odpadów</h1>
         <p style={{ color: '#666', fontSize: '0.9rem', margin: '0 0 0.8rem 0' }}>Środa Śląska – I Rejon</p>
         
-        <button
-          onClick={subscribeToPush}
-          disabled={isSubscribed || loading}
-          style={{
-            padding: '0.5rem 1rem',
-            fontSize: '0.85rem',
-            fontWeight: 'bold',
-            backgroundColor: isSubscribed ? '#2e7d32' : '#1565c0',
-            color: '#ffffff',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: isSubscribed || loading ? 'default' : 'pointer',
-            margin: '0 auto',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            opacity: loading ? 0.7 : 1
-          }}
-        >
-          {loading ? '⏳ Sprawdzanie...' : isSubscribed ? '🔔 Powiadomienia Aktywne' : '🔔 Włącz Powiadomienia Push'}
-        </button>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+          <button
+            onClick={subscribeToPush}
+            disabled={isSubscribed || loading}
+            style={{
+              padding: '0.5rem 1rem',
+              fontSize: '0.85rem',
+              fontWeight: 'bold',
+              backgroundColor: isSubscribed ? '#2e7d32' : '#1565c0',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: isSubscribed || loading ? 'default' : 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              opacity: loading ? 0.7 : 1
+            }}
+          >
+            {loading ? '⏳ Sprawdzanie...' : isSubscribed ? '🔔 Powiadomienia Aktywne' : '🔔 Włącz Powiadomienia Push'}
+          </button>
+
+          {/* 2. UŻYCIE KOMPONENTU DO INSTALACJI PWA */}
+          <InstallPWA />
+        </div>
       </header>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
