@@ -1,7 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { WASTE_SCHEDULE_REGION_1 } from './lib/schedule';
+
+const WASTE_SCHEDULE_REGION_1: Record<string, string[]> = {
+  '2026-09-07': ['Zmieszane', 'Biodegradowalne', 'Papier'],
+  '2026-09-10': ['Wielkogabaryty'],
+  '2026-09-14': ['Zmieszane', 'Biodegradowalne', 'Metale i tworzywa sztuczne'],
+  '2026-09-19': ['Tekstylia i odzież'],
+  '2026-09-21': ['Zmieszane', 'Biodegradowalne'],
+  '2026-09-28': ['Zmieszane', 'Biodegradowalne', 'Metale i tworzywa sztuczne', 'Szkło'],
+};
 
 const MONTH_NAMES = [
   'Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec',
@@ -9,6 +17,28 @@ const MONTH_NAMES = [
 ];
 
 const WEEKDAYS = ['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'So', 'Nd'];
+
+function getTagStyle(item: string) {
+  const lower = item.toLowerCase();
+  
+  if (lower.includes('zmieszane')) {
+    return { backgroundColor: '#212121', color: '#ffffff' };
+  }
+  if (lower.includes('bio') || lower.includes('biodegradowalne')) {
+    return { backgroundColor: '#5d4037', color: '#ffffff' };
+  }
+  if (lower.includes('metale') || lower.includes('tworzywa')) {
+    return { backgroundColor: '#fbc02d', color: '#000000' };
+  }
+  if (lower.includes('szkło') || lower.includes('szklo')) {
+    return { backgroundColor: '#2e7d32', color: '#ffffff' };
+  }
+  if (lower.includes('papier')) {
+    return { backgroundColor: '#1565c0', color: '#ffffff' };
+  }
+  
+  return { backgroundColor: '#e0e0e0', color: '#212121' };
+}
 
 export default function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date(2026, 8, 1));
@@ -84,7 +114,7 @@ export default function CalendarPage() {
             <div 
               key={dayNumber} 
               style={{ 
-                minHeight: '90px', 
+                minHeight: '100px', 
                 backgroundColor: '#fff', 
                 border: wasteItems ? '2px solid #2e7d32' : '1px solid #e0e0e0', 
                 borderRadius: '6px',
@@ -94,37 +124,39 @@ export default function CalendarPage() {
                 boxShadow: wasteItems ? '0 2px 4px rgba(0,0,0,0.05)' : 'none'
               }}
             >
-              <span style={{ fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '4px', color: wasteItems ? '#2e7d32' : '#333' }}>
+              <span style={{ fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '4px', color: '#333' }}>
                 {dayNumber}
               </span>
               
               {wasteItems && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', overflowY: 'auto' }}>
-                  {wasteItems.map((item, i) => (
-                    <span 
-                      key={i} 
-                      style={{ 
-                        fontSize: '0.7rem', 
-                        backgroundColor: '#e8f5e9', 
-                        color: '#1b5e20', 
-                        padding: '2px 4px', 
-                        borderRadius: '3px',
-                        lineHeight: '1.2'
-                      }}
-                    >
-                      • {item}
-                    </span>
-                  ))}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                  {wasteItems.map((item, i) => {
+                    const style = getTagStyle(item);
+                    return (
+                      <span 
+                        key={i} 
+                        style={{ 
+                          fontSize: '0.65rem', 
+                          fontWeight: 'bold',
+                          backgroundColor: style.backgroundColor, 
+                          color: style.color, 
+                          padding: '3px 4px', 
+                          borderRadius: '3px',
+                          lineHeight: '1.1',
+                          display: 'block',
+                          wordBreak: 'break-word'
+                        }}
+                      >
+                        {item}
+                      </span>
+                    );
+                  })}
                 </div>
               )}
             </div>
           );
         })}
       </div>
-
-      <footer style={{ marginTop: '2rem', padding: '1rem', backgroundColor: '#f5f5f5', borderRadius: '6px', fontSize: '0.85rem' }}>
-        <strong>Zabudowa jednorodzinna:</strong> Odbiór papieru odbywa się raz w miesiącu[cite: 8]. Powiadomienie e-mail jest wysyłane automatycznie dzień wcześniej o godzinie 18:00.
-      </footer>
     </div>
   );
 }
